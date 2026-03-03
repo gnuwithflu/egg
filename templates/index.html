@@ -368,6 +368,39 @@ more ore less readable, I just thought it would be nice to let you know :)
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
+
+<!-- ═══ MOBILE NAVIGATION ══════════════════════════════════════════════════ -->
+<nav id="mobile-nav">
+  <button class="mobile-nav-btn" id="mob-btn-farm" onclick="mobileToggleDrawer('left')" title="Farm / Log">
+    <span class="nav-icon">🐔</span>
+    <span>Farm</span>
+  </button>
+  <button class="mobile-nav-btn active" id="mob-btn-center" onclick="mobileShowCenter()" title="Simulator">
+    <span class="nav-icon">📊</span>
+    <span>Simulator</span>
+  </button>
+  <button class="mobile-nav-btn" id="mob-btn-actions" onclick="mobileToggleDrawer('right')" title="Actions">
+    <span class="nav-icon">⚡</span>
+    <span>Actions</span>
+  </button>
+</nav>
+
+<!-- Drawer overlay (tap to close) -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="mobileCloseDrawers()"></div>
+
+<!-- Left panel drawer (Farm / Log) -->
+<div class="mobile-drawer" id="mobile-left-drawer">
+  <div class="drawer-handle"><div class="drawer-handle-bar"></div></div>
+  <div id="mobile-left-content"><!-- cloned content injected by JS --></div>
+</div>
+
+<!-- Right panel drawer (Actions) -->
+<div class="mobile-drawer" id="mobile-right-drawer">
+  <div class="drawer-handle"><div class="drawer-handle-bar"></div></div>
+  <div id="mobile-right-content"><!-- cloned content injected by JS --></div>
+</div>
+
+
 <!-- ═══ CREDITS MODAL ═══════════════════════════════════════════════════════ -->
 <div id="credits-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeCredits()">
   <div class="modal-box" style="max-width:480px">
@@ -397,5 +430,91 @@ more ore less readable, I just thought it would be nice to let you know :)
 </div>
 
 <script src="/static/js/app.js"></script>
+<script>
+/* ─── Mobile Panel Logic ──────────────────────────────────── */
+(function() {
+  var leftDrawer  = document.getElementById('mobile-left-drawer');
+  var rightDrawer = document.getElementById('mobile-right-drawer');
+  var overlay     = document.getElementById('drawer-overlay');
+  var leftContent  = document.getElementById('mobile-left-content');
+  var rightContent = document.getElementById('mobile-right-content');
+  var leftPanel   = document.getElementById('left-panel');
+  var rightPanel  = document.getElementById('right-panel');
+
+  var activeDrawer = null;
+
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function syncDrawerContent() {
+    if (!isMobile()) return;
+    // Mirror panel content into drawers so interactions still work
+    leftContent.innerHTML  = '';
+    rightContent.innerHTML = '';
+    // We clone nodes so the real DOM elements (with event listeners) stay in place
+    // Instead, just show the original panels inside the drawers
+    leftContent.appendChild(leftPanel);
+    rightContent.appendChild(rightPanel);
+  }
+
+  function restorepanels() {
+    // Move panels back to #app when switching to desktop
+    var app = document.getElementById('app');
+    var center = document.getElementById('center-panel');
+    if (leftPanel.parentNode !== app) {
+      app.insertBefore(leftPanel, center);
+    }
+    if (rightPanel.parentNode !== app) {
+      app.appendChild(rightPanel);
+    }
+    leftPanel.style.display = '';
+    rightPanel.style.display = '';
+  }
+
+  window.mobileToggleDrawer = function(side) {
+    if (!isMobile()) return;
+    syncDrawerContent();
+    var drawer = side === 'left' ? leftDrawer : rightDrawer;
+
+    if (activeDrawer === drawer) {
+      mobileCloseDrawers();
+      return;
+    }
+
+    mobileCloseDrawers(true);
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    activeDrawer = drawer;
+
+    // Highlight nav btn
+    document.getElementById('mob-btn-farm').classList.toggle('active', side === 'left');
+    document.getElementById('mob-btn-actions').classList.toggle('active', side === 'right');
+    document.getElementById('mob-btn-center').classList.remove('active');
+  };
+
+  window.mobileCloseDrawers = function(silent) {
+    leftDrawer.classList.remove('open');
+    rightDrawer.classList.remove('open');
+    overlay.classList.remove('open');
+    activeDrawer = null;
+    if (!silent) {
+      document.getElementById('mob-btn-center').classList.add('active');
+      document.getElementById('mob-btn-farm').classList.remove('active');
+      document.getElementById('mob-btn-actions').classList.remove('active');
+    }
+  };
+
+  window.mobileShowCenter = function() {
+    mobileCloseDrawers();
+  };
+
+  // On resize: restore panels to desktop layout if needed
+  window.addEventListener('resize', function() {
+    if (!isMobile()) {
+      mobileCloseDrawers(true);
+      restorepanels();
+    }
+  });
+})();
+</script>
 </body>
 </html>
