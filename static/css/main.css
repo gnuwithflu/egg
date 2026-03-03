@@ -646,7 +646,6 @@ select.input-sm { cursor: pointer; }
 }
 .btn-edit-mode:hover { background: var(--blue); color: white; }
 
-
 /* ═══════════════════════════════════════════════════════════
    Mobile Responsive Styles
 ═══════════════════════════════════════════════════════════ */
@@ -678,6 +677,7 @@ select.input-sm { cursor: pointer; }
 
 /* ─── Mobile Panel Drawer ────────────────────────────────── */
 .mobile-drawer {
+  /* Hidden on desktop entirely */
   display: none;
 }
 .drawer-handle {
@@ -726,16 +726,43 @@ select.input-sm { cursor: pointer; }
   /* Center panel fills screen */
   #center-panel {
     border: none;
-    overflow: hidden;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Scroll wrapper: tab content + virtue stats scroll together as one unit */
+  #main-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 72px; /* clears the 56px fixed nav bar */
+  }
+
+  /* Tab panes: no longer scroll independently on mobile */
+  #tab-content {
+    overflow: visible;
+    flex: unset;
+    position: static;
+    height: auto;
+  }
+  .tab-pane {
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Virtue stats */
+  #virtue-stats {
+    overflow-x: auto;
   }
 
   /* Show mobile nav */
   #mobile-nav { display: flex; }
 
   /* Drawer: always in the DOM but off-screen until .open is added */
-
-   .mobile-drawer {
+  .mobile-drawer {
     display: block;
     position: fixed;
     bottom: 56px; left: 0; right: 0;
@@ -791,9 +818,6 @@ select.input-sm { cursor: pointer; }
 
   /* CR two col stays but smaller */
   .cr-two-col { grid-template-columns: 1fr; }
-
-  /* Virtue stats horizontal scroll */
-  #virtue-stats { overflow-x: auto; }
 
   /* Modal full-screen on mobile */
   .modal-box {

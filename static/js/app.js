@@ -519,7 +519,7 @@ function renderHabsTab() {
   const canBuy  = state?.egg === 'integrity';
   const el      = document.getElementById('tab-habs-content');
   el.innerHTML  = `
-    ${!canBuy ? `<div class="tab-note">Buying habs requires the <strong>Integrity</strong> egg</div>` : ''}
+    ${!canBuy ? `<div class="tab-note">Buying habs requires <strong>Integrity</strong> egg</div>` : ''}
     <div class="hab-grid">${habs.map(h => {
       const affordable = !h.maxed && canBuy && cash >= h.cost_raw;
       return `<div class="hab-card">
@@ -554,7 +554,7 @@ function renderCRTab() {
   cr.forEach(r => { (tiers[r.tier] ||= []).push(r); });
 
   el.innerHTML = `
-    ${!canBuy ? `<div class="tab-note">Buying research requires the <strong>Curiosity</strong> egg</div>` : ''}
+    ${!canBuy ? `<div class="tab-note">Buying research requires <strong>Curiosity</strong> egg</div>` : ''}
     <div class="cr-two-col">
     ${Object.entries(tiers).map(([tier, items]) => {
       const tierAffordable = canBuy && items.some(r => cash >= r.cost_raw);
@@ -598,7 +598,7 @@ function renderVehiclesTab() {
   const canBuy = state?.egg === 'kindness';
   const el     = document.getElementById('tab-vehicles-content');
   el.innerHTML = `
-    ${!canBuy ? `<div class="tab-note">Buying vehicles requires the <strong>Kindness</strong> egg</div>` : ''}
+    ${!canBuy ? `<div class="tab-note">Buying vehicles requires <strong>Kindness</strong> egg</div>` : ''}
     <div class="vehicle-grid">${vehs.map(v => {
       const affordable  = canBuy && !v.maxed && cash >= v.cost_raw;
       const isHyperloop = v.level >= 12;
@@ -629,7 +629,7 @@ function renderSilosTab() {
     `<div class="silo-dot ${i < silo.count ? 'owned' : ''}"><img src="${SILO_IMG}" width="72" height="72" alt="silo" class="silo-img${i < silo.count ? '' : ' silo-empty'}"></div>`
   ).join('');
   el.innerHTML = `
-    ${!canBuy ? `<div class="tab-note">Buying silos requires the <strong>Resilience</strong> egg</div>` : ''}
+    ${!canBuy ? `<div class="tab-note">Buying silos requires <strong>Resilience</strong> egg</div>` : ''}
     <div class="silo-display">${dots}</div>
     <div class="silo-info">
       <p>Silos owned: <span>${silo.count}/10</span></p>
@@ -683,7 +683,7 @@ function renderArtifactsTab() {
   }).join('');
 
   el.innerHTML = `
-    ${!isHumility ? `<div class="tab-note">👁 Viewing only — shift to <strong>Humility</strong> egg to edit artifacts</div>` : ''}
+    ${!isHumility ? `<div class="tab-note">Editing artifacts requires <strong>Humility</strong> egg</div>` : ''}
     <div class="artifact-display-grid">${cards}</div>`;
 }
 

@@ -108,7 +108,9 @@ more ore less readable, I just thought it would be nice to let you know :)
       <button class="tab-btn" onclick="switchTab('artifacts')" id="tab-artifacts">Artifacts</button>
     </div>
 
-    <!-- Tab content -->
+    <!-- Tab content + Virtue progress wrapped for mobile scroll -->
+    <div id="main-scroll-area">
+
     <div id="tab-content">
       <div id="tab-habs-content" class="tab-pane active"></div>
       <div id="tab-cr-content" class="tab-pane"></div>
@@ -128,6 +130,8 @@ more ore less readable, I just thought it would be nice to let you know :)
       </div>
       <div id="virtue-rows"></div>
     </div>
+
+    </div><!-- end #main-scroll-area -->
 
   </main>
 
@@ -368,7 +372,6 @@ more ore less readable, I just thought it would be nice to let you know :)
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
-
 <!-- ═══ MOBILE NAVIGATION ══════════════════════════════════════════════════ -->
 <nav id="mobile-nav">
   <button class="mobile-nav-btn" id="mob-btn-farm" onclick="mobileToggleDrawer('left')" title="Farm / Log">
@@ -399,7 +402,6 @@ more ore less readable, I just thought it would be nice to let you know :)
   <div class="drawer-handle"><div class="drawer-handle-bar"></div></div>
   <div id="mobile-right-content"><!-- cloned content injected by JS --></div>
 </div>
-
 
 <!-- ═══ CREDITS MODAL ═══════════════════════════════════════════════════════ -->
 <div id="credits-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeCredits()">

@@ -91,6 +91,7 @@ def simulate_egg(state, s, egg, printout=True):
             wait_active(state, time_layed_active(state, lay-state.eggs_layed[virtue_egg_index[egg]]), printout=False)
         else:
             wait_offline(state, time_layed(state, lay-state.eggs_layed[virtue_egg_index[egg]]), printout=False)
+    buy_all(state)
 
     if printout:      
         index(state)
