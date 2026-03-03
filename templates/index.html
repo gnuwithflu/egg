@@ -433,46 +433,40 @@ more ore less readable, I just thought it would be nice to let you know :)
 <script>
 /* ─── Mobile Panel Logic ──────────────────────────────────── */
 (function() {
-  var leftDrawer  = document.getElementById('mobile-left-drawer');
-  var rightDrawer = document.getElementById('mobile-right-drawer');
-  var overlay     = document.getElementById('drawer-overlay');
+  var leftDrawer   = document.getElementById('mobile-left-drawer');
+  var rightDrawer  = document.getElementById('mobile-right-drawer');
+  var overlay      = document.getElementById('drawer-overlay');
   var leftContent  = document.getElementById('mobile-left-content');
   var rightContent = document.getElementById('mobile-right-content');
-  var leftPanel   = document.getElementById('left-panel');
-  var rightPanel  = document.getElementById('right-panel');
+  var leftPanel    = document.getElementById('left-panel');
+  var rightPanel   = document.getElementById('right-panel');
+  var app          = document.getElementById('app');
+  var centerPanel  = document.getElementById('center-panel');
 
   var activeDrawer = null;
+  var initialised  = false;
 
   function isMobile() { return window.innerWidth <= 768; }
 
-  function syncDrawerContent() {
-    if (!isMobile()) return;
-    // Mirror panel content into drawers so interactions still work
-    leftContent.innerHTML  = '';
-    rightContent.innerHTML = '';
-    // We clone nodes so the real DOM elements (with event listeners) stay in place
-    // Instead, just show the original panels inside the drawers
+  function initMobile() {
+    if (initialised) return;
+    initialised = true;
+    // Move the real panels (with all their event listeners) into the drawers
     leftContent.appendChild(leftPanel);
     rightContent.appendChild(rightPanel);
   }
 
-  function restorepanels() {
-    // Move panels back to #app when switching to desktop
-    var app = document.getElementById('app');
-    var center = document.getElementById('center-panel');
-    if (leftPanel.parentNode !== app) {
-      app.insertBefore(leftPanel, center);
-    }
-    if (rightPanel.parentNode !== app) {
-      app.appendChild(rightPanel);
-    }
-    leftPanel.style.display = '';
-    rightPanel.style.display = '';
+  function restorePanels() {
+    if (!initialised) return;
+    initialised = false;
+    // Move panels back into #app for desktop layout
+    app.insertBefore(leftPanel, centerPanel);
+    app.appendChild(rightPanel);
   }
 
   window.mobileToggleDrawer = function(side) {
     if (!isMobile()) return;
-    syncDrawerContent();
+    initMobile();
     var drawer = side === 'left' ? leftDrawer : rightDrawer;
 
     if (activeDrawer === drawer) {
@@ -480,12 +474,15 @@ more ore less readable, I just thought it would be nice to let you know :)
       return;
     }
 
-    mobileCloseDrawers(true);
+    // Close whichever is open, then open the new one
+    leftDrawer.classList.remove('open');
+    rightDrawer.classList.remove('open');
+    // Force a reflow so the transition fires fresh
+    drawer.getBoundingClientRect();
     drawer.classList.add('open');
     overlay.classList.add('open');
     activeDrawer = drawer;
 
-    // Highlight nav btn
     document.getElementById('mob-btn-farm').classList.toggle('active', side === 'left');
     document.getElementById('mob-btn-actions').classList.toggle('active', side === 'right');
     document.getElementById('mob-btn-center').classList.remove('active');
@@ -511,9 +508,14 @@ more ore less readable, I just thought it would be nice to let you know :)
   window.addEventListener('resize', function() {
     if (!isMobile()) {
       mobileCloseDrawers(true);
-      restorepanels();
+      restorePanels();
+    } else {
+      initMobile();
     }
   });
+
+  // Init on load if already mobile
+  if (isMobile()) initMobile();
 })();
 </script>
 </body>
