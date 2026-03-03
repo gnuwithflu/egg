@@ -439,17 +439,17 @@ def buy(state, s="", printout=True):
         return True
     return False
 
-def buy_all(state, s=""):
+def buy_all(state, s="", printout=True):
     # distribute the buyall keyword depending on the egg
     f = state.farm
     if f.egg == "resilience":
-        buy_silo_all(state)
+        buy_silo_all(state, printout)
     elif f.egg == "integrity":
-        buy_hab_all(state)
+        buy_hab_all(state, printout)
     elif f.egg == "kindness":
-        buy_vehicle_all(state)
+        buy_vehicle_all(state, printout)
     elif f.egg == "curiosity":
-        buy_cr_all(state)
+        buy_cr_all(state, printout)
     return False
 
 def buy_silo(state, printout=True):
@@ -472,7 +472,7 @@ def buy_silo(state, printout=True):
         print()
     return True
 
-def buy_silo_all(state):
+def buy_silo_all(state, printout=True):
     f = state.farm
     counter=0
     while f.silos<10 and f.cash>silo_price[f.silos]:
@@ -480,9 +480,10 @@ def buy_silo_all(state):
             counter+=1
         else:
             break
-    index(state)
-    print(f"Bought {counter} silos!")
-    print()
+    if printout:
+        index(state)
+        print(f"Bought {counter} silos!")
+        print()
     return
 
 def buy_hab(state, hab, printout=True):
@@ -516,7 +517,7 @@ def buy_hab(state, hab, printout=True):
         print()
     return True
 
-def buy_hab_all(state):
+def buy_hab_all(state, printout=True):
     f = state.farm
     counter=0
     while True:
@@ -536,12 +537,13 @@ def buy_hab_all(state):
                 min_index = i
 
         if min_index==-1 or f.cash<min_price: 
-            if(counter==1):
-                print("No hab bought :(")
-            else:
-                index(state)
-                print(f"Bought {counter-1} habs!")
-            print()
+            if printout:
+                if(counter==1):
+                    print("No hab bought :(")
+                else:
+                    index(state)
+                    print(f"Bought {counter-1} habs!")
+                print()
             break
         if not buy_hab(state, min_index, printout=False): break
 
@@ -578,7 +580,7 @@ def buy_vehicle(state, vehicle, printout=True):
         print()
     return True
 
-def buy_vehicle_all(state):
+def buy_vehicle_all(state, printout=True):
     f = state.farm
     counter=0
     while True:
@@ -597,13 +599,14 @@ def buy_vehicle_all(state):
                     min_price = upgrade_cost
                     min_index = i
 
-        if min_index==-1 or f.cash<min_price: 
-            if(counter==1):
-                print("No vehicle bought :(")
-            else:
-                index(state)
-                print(f"Bought {counter-1} vehicles!")
-            print()
+        if min_index==-1 or f.cash<min_price:
+            if printout:
+                if(counter==1):
+                    print("No vehicle bought :(")
+                else:
+                    index(state)
+                    print(f"Bought {counter-1} vehicles!")
+                print()
             break
         if not buy_vehicle(state, min_index, printout=False):
             break
@@ -630,7 +633,7 @@ def buy_cr(state, cr_index, printout=True):
         print()
     return True
 
-def buy_cr_all(state):
+def buy_cr_all(state, printout=True):
     f = state.farm
     counter=0
     while True:
@@ -648,9 +651,10 @@ def buy_cr_all(state):
             if(counter==1):
                 print("No research bought :(")
             else:
-                index(state)
-                print(f"Bought {counter-1} researches!")
-            print()
+                if printout:
+                    index(state)
+                    print(f"Bought {counter-1} researches!")
+                    print()
             break
         if not buy_cr(state, min_index, printout=False): break
 
