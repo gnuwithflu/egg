@@ -9,7 +9,7 @@ more ore less readable, I just thought it would be nice to let you know :)
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PoV Simulator</title>
-<link rel="icon" type="image/x-icon" href="/static/images/eggs/egg_truth.png">
+<link rel="icon" type="image/x-icon" href="/static/images/virtue_gem.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/main.css">
@@ -17,28 +17,7 @@ more ore less readable, I just thought it would be nice to let you know :)
 <body>
 <div id="app">
 
-  <!-- ═══ LEFT PANEL ═══════════════════════════════════════ -->
-  <aside id="left-panel">
-    <div class="panel-header">
-      <span class="panel-title">Farm</span>
-      <div id="te-display" class="te-badge">— TE</div>
-      <button class="btn-edit" onclick="openFarmModal()">edit</button>
-    </div>
-
-    <div id="log-container">
-      <div class="log-label">
-        Session Log
-        <button class="log-copy-btn" onclick="copyAllLog()" title="Copy all log entries to replay input">copy all</button>
-      </div>
-      <div id="log-list"></div>
-    </div>
-
-    <div class="panel-footer">
-      <div class="log-label">Replay Input</div>
-      <textarea id="custom-input" placeholder="Paste log commands..." rows="3"></textarea>
-      <button class="btn-secondary" onclick="replayInput()" style="width:100%">replay</button>
-    </div>
-  </aside>
+<div id="panel-group">
 
   <!-- ═══ CENTER PANEL ══════════════════════════════════════ -->
   <main id="center-panel">
@@ -47,9 +26,11 @@ more ore less readable, I just thought it would be nice to let you know :)
     <div id="farm-header">
       <div class="farm-name-row">
         <div id="egg-icon-display" class="egg-icon-large curiosity">🥚</div>
-        <div>
+        <div class="farm-egg-name-wrap">
           <div id="farm-egg-label" class="farm-egg-name">Curiosity</div>
         </div>
+        <div id="te-display" class="te-badge" style="margin-left:auto">— TE</div>
+        <button class="btn-edit" onclick="openFarmModal()" style="margin-left:8px">edit</button>
       </div>
       <div class="stat-trio">
         <div class="stat-block" data-tip="Total simulated time elapsed">
@@ -119,7 +100,9 @@ more ore less readable, I just thought it would be nice to let you know :)
       <div id="tab-artifacts-content" class="tab-pane"></div>
     </div>
 
-    <!-- Virtue progress -->
+    </div><!-- end #main-scroll-area -->
+
+    <!-- Virtue progress — pinned to bottom of center panel -->
     <div id="virtue-stats">
       <div class="virtue-header">
         <span class="virtue-title">Virtue Progress</span>
@@ -131,8 +114,6 @@ more ore less readable, I just thought it would be nice to let you know :)
       <div id="virtue-rows"></div>
     </div>
 
-    </div><!-- end #main-scroll-area -->
-
   </main>
 
   <!-- ═══ RIGHT PANEL ═══════════════════════════════════════ -->
@@ -142,6 +123,8 @@ more ore less readable, I just thought it would be nice to let you know :)
       <button class="btn-reset" onclick="doReset()" title="Start a completely fresh simulation">Reset</button>
       <button class="btn-prestige" onclick="doPrestige()">Prestige</button>
     </div>
+
+    <div id="right-panel-scroll">
 
     <!-- Simulate Egg -->
     <div class="action-block">
@@ -236,14 +219,31 @@ more ore less readable, I just thought it would be nice to let you know :)
       <div id="snapshots-list" style="margin-top:6px"></div>
     </div>
 
-    <!-- Credits -->
-    <div style="padding:8px 16px 12px;margin-top:auto">
-      <button class="btn-credits" onclick="openCredits()">Credits</button>
+    </div><!-- end #right-panel-scroll -->
+
+    <!-- Snapshot Import / Export — fixed at bottom -->
+    <div id="right-panel-footer">
+      <!-- Snapshot Text -->
+      <div class="action-block" style="border-bottom:none">
+        <div class="action-title">Snapshot Text</div>
+        <div id="snapshot-resize-handle" title="Drag to resize"></div>
+        <textarea id="snapshot-text-area" placeholder="Export a snapshot (⬆) to see its text here, or paste snapshot text to import..." style="width:100%;box-sizing:border-box;font-family:var(--font-mono,monospace);font-size:11px;resize:none;height:120px"></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <button class="btn-secondary" onclick="importSnapshotText()" style="flex:1">Import</button>
+          <button class="btn-secondary" onclick="clearSnapshotText()" style="flex:0 0 auto">Clear</button>
+        </div>
+      </div>
+      <!-- Credits -->
+      <div style="padding:6px 16px 10px">
+        <button class="btn-credits" onclick="openCredits()">Credits</button>
+      </div>
     </div>
 
   </aside>
 
-</div>
+</div><!-- end #panel-group -->
+
+</div><!-- end #app -->
 
 <!-- ═══ FARM SETUP MODAL ══════════════════════════════════════════════════ -->
 <div id="farm-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeFarmModal()">
@@ -374,10 +374,6 @@ more ore less readable, I just thought it would be nice to let you know :)
 
 <!-- ═══ MOBILE NAVIGATION ══════════════════════════════════════════════════ -->
 <nav id="mobile-nav">
-  <button class="mobile-nav-btn" id="mob-btn-farm" onclick="mobileToggleDrawer('left')" title="Farm / Log">
-    <span class="nav-icon">🐔</span>
-    <span>Farm</span>
-  </button>
   <button class="mobile-nav-btn active" id="mob-btn-center" onclick="mobileShowCenter()" title="Simulator">
     <span class="nav-icon">📊</span>
     <span>Simulator</span>
@@ -390,12 +386,6 @@ more ore less readable, I just thought it would be nice to let you know :)
 
 <!-- Drawer overlay (tap to close) -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="mobileCloseDrawers()"></div>
-
-<!-- Left panel drawer (Farm / Log) -->
-<div class="mobile-drawer" id="mobile-left-drawer">
-  <div class="drawer-handle"><div class="drawer-handle-bar"></div></div>
-  <div id="mobile-left-content"><!-- cloned content injected by JS --></div>
-</div>
 
 <!-- Right panel drawer (Actions) -->
 <div class="mobile-drawer" id="mobile-right-drawer">
@@ -435,15 +425,11 @@ more ore less readable, I just thought it would be nice to let you know :)
 <script>
 /* ─── Mobile Panel Logic ──────────────────────────────────── */
 (function() {
-  var leftDrawer   = document.getElementById('mobile-left-drawer');
   var rightDrawer  = document.getElementById('mobile-right-drawer');
   var overlay      = document.getElementById('drawer-overlay');
-  var leftContent  = document.getElementById('mobile-left-content');
   var rightContent = document.getElementById('mobile-right-content');
-  var leftPanel    = document.getElementById('left-panel');
   var rightPanel   = document.getElementById('right-panel');
-  var app          = document.getElementById('app');
-  var centerPanel  = document.getElementById('center-panel');
+  var panelGroup   = document.getElementById('panel-group');
 
   var activeDrawer = null;
   var initialised  = false;
@@ -453,51 +439,41 @@ more ore less readable, I just thought it would be nice to let you know :)
   function initMobile() {
     if (initialised) return;
     initialised = true;
-    // Move the real panels (with all their event listeners) into the drawers
-    leftContent.appendChild(leftPanel);
     rightContent.appendChild(rightPanel);
   }
 
   function restorePanels() {
     if (!initialised) return;
     initialised = false;
-    // Move panels back into #app for desktop layout
-    app.insertBefore(leftPanel, centerPanel);
-    app.appendChild(rightPanel);
+    panelGroup.appendChild(rightPanel);
   }
 
   window.mobileToggleDrawer = function(side) {
     if (!isMobile()) return;
     initMobile();
-    var drawer = side === 'left' ? leftDrawer : rightDrawer;
+    var drawer = rightDrawer;
 
     if (activeDrawer === drawer) {
       mobileCloseDrawers();
       return;
     }
 
-    // Close whichever is open, then open the new one
-    leftDrawer.classList.remove('open');
     rightDrawer.classList.remove('open');
-    // Force a reflow so the transition fires fresh
     drawer.getBoundingClientRect();
     drawer.classList.add('open');
     overlay.classList.add('open');
     activeDrawer = drawer;
 
-    document.getElementById('mob-btn-farm').classList.toggle('active', side === 'left');
-    document.getElementById('mob-btn-actions').classList.toggle('active', side === 'right');
+    document.getElementById('mob-btn-actions').classList.add('active');
     document.getElementById('mob-btn-center').classList.remove('active');
   };
 
   window.mobileCloseDrawers = function(silent) {
-    leftDrawer.classList.remove('open');
     rightDrawer.classList.remove('open');
     overlay.classList.remove('open');
     activeDrawer = null;
     if (!silent) {
       document.getElementById('mob-btn-center').classList.add('active');
-      document.getElementById('mob-btn-farm').classList.remove('active');
       document.getElementById('mob-btn-actions').classList.remove('active');
     }
   };
@@ -506,7 +482,6 @@ more ore less readable, I just thought it would be nice to let you know :)
     mobileCloseDrawers();
   };
 
-  // On resize: restore panels to desktop layout if needed
   window.addEventListener('resize', function() {
     if (!isMobile()) {
       mobileCloseDrawers(true);
@@ -516,7 +491,6 @@ more ore less readable, I just thought it would be nice to let you know :)
     }
   });
 
-  // Init on load if already mobile
   if (isMobile()) initMobile();
 })();
 </script>
