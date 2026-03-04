@@ -342,7 +342,6 @@ function renderAll(stats) {
   document.querySelector(`.${egg}-btn`)?.classList.add('active-egg');
 
   renderVirtueRows(stats);
-  renderLog();
   renderEventTags();
   renderVideoDoublerBtn();
 }
@@ -373,73 +372,6 @@ function renderVirtueRows(stats) {
       </div>
     </div>`
   ).join('');
-}
-
-function renderLog() {
-  if (!state) return;
-  const list = document.getElementById('log-list');
-  const eggs = ['curiosity','kindness','resilience','humility','integrity'];
-  list.innerHTML = (state.log || []).slice().reverse().map(entry => {
-    const cmd = logToCommand(entry);
-    const replayable = !cmd.startsWith('#');
-    const eggColor = eggs.includes(entry.action) ? `color:${EGG_COLOR[entry.action]}` : '';
-    return `<div class="log-entry ${replayable?'replayable':''}" onclick='${replayable?`copyLogEntry(${JSON.stringify(cmd)})`:''}' title="${replayable?'Click to copy to replay input':'Not replayable'}">
-      <span class="log-time">${entry.time||''}</span>
-      <span class="log-action" style="${eggColor}"><strong>${esc(entry.action)}</strong> <span class="log-detail">${esc(entry.detail||'')}</span></span>
-    </div>`;
-  }).join('');
-}
-
-// The log action field IS the command. Detail is just display info after →.
-// Log format examples:
-//   action="curiosity"      detail="1h → +25B eggs"   → "curiosity 1h"
-//   action="curiosity"      detail="5te → ..."         → "curiosity 5te"
-//   action="wait"           detail="1.00h"             → "wait 1.00h"
-//   action="waitactive"     detail="30.0min"           → "waitactive 30.0min"
-//   action="wait 100B cash" detail="2.5h"              → "wait 100B cash"
-//   action="shift curiosity" detail=""                 → "shift curiosity"
-//   action="prestige"       detail="+3 TE → total 13" → "prestige"
-//   action="buy cr 5"       detail=""                  → "buy cr 5"
-//   action="buy silo"       detail=""                  → "buy silo"
-//   action="buyall"         detail="on curiosity"      → "buyall"
-function logToCommand(entry) {
-  const a = entry.action;
-  const eggs = ['curiosity','kindness','resilience','humility','integrity'];
-
-  // egg simulation: action is the egg name, detail is "1h → +Xeggs" or "5te → ..."
-  if (eggs.includes(a)) {
-    const val = entry.detail.split('→')[0].trim();
-    return `${a} ${val}`;
-  }
-  // wait / waitactive — action is the full command base, detail is the computed duration
-  if (a === 'wait' || a === 'waitactive') {
-    return `${a} ${entry.detail.trim()}`;
-  }
-  // wait with cash target baked in: "wait 100B cash"
-  if (a.startsWith('wait ') || a.startsWith('waitactive ')) {
-    return a;
-  }
-  if (a.startsWith('shift '))  return a;
-  if (a === 'prestige')        return 'prestige';
-  if (a === 'buyall')          return 'buyall';
-  // buy cr/hab/vehicle/silo — action is already the full command
-  if (a.startsWith('buy '))    return a;
-  // artifact commands: "artifact a1 totem 4 L lunar 3" or "artifact a1 clear"
-  if (a.startsWith('artifact ')) return a;
-  return `# ${a} ${entry.detail||''}`.trim();
-}
-
-function copyLogEntry(cmd) {
-  const ta = document.getElementById('custom-input');
-  ta.value = (ta.value ? ta.value + '\n' : '') + cmd;
-  showToast('Added to replay input');
-}
-
-function copyAllLog() {
-  if (!state?.log?.length) return;
-  const lines = state.log.map(logToCommand).filter(c => !c.startsWith('#'));
-  document.getElementById('custom-input').value = lines.join('\n');
-  showToast(`Copied ${lines.length} commands to replay`);
 }
 
 // ─── Preview text ───────────────────────────────────────────
@@ -650,6 +582,31 @@ function calcAwayTime(s) {
 // ─── Artifacts Tab ─────────────────────────────────────────
 // Always viewable; editing only on Humility egg.
 
+// Short description of what each artifact type does
+const ARTI_EFFECT_DESC = {
+  actuator:  'additional hold to hatch',
+  ankh:      '× egg value',
+  beak:      '× chance of gold drones',
+  book:      '× PE bonus',
+  brooch:    '× drone value',
+  chalice:   '× IHR',
+  compass:   '× shipping capacity',
+  cube:      '× research cost',
+  deflector: '× coop earnings',
+  feather:   '× soul eggs',
+  gusset:    '× hab capacity',
+  lens:      '× farm value',
+  light:     '× enlightment egg value',
+  medallion: '× egg value',
+  metronome: '× egg laying rate',
+  monocle:   '× boost boost',
+  necklace:  '× egg value',
+  rainstick: '× chance of cash drones',
+  ship:      '× coop earnings',
+  totem:     '× away earnings',
+  vial:      'additional max RCB',
+};
+
 function renderArtifactsTab() {
   if (!state) return;
   const isHumility = state.egg === 'humility';
@@ -659,26 +616,34 @@ function renderArtifactsTab() {
   const cards = slots.map(slot => {
     const art = state.artifact_set?.[slot];
     if (!art || !art.type) return `
-      <div class="artifact-display-card empty" id="art-card-${slot}">
-        <div class="artifact-slot-label">${slot.toUpperCase()}</div>
+      <div class="artifact-display-card empty" id="art-card-${slot}" ${isHumility ? `onclick="openArtifactEditor('${slot}')"` : ''}>
         <div class="artifact-empty-icon">✦</div>
-        ${isHumility ? `<button class="btn-upgrade" style="margin-top:8px;width:100%" onclick="openArtifactEditor('${slot}')">Set Artifact</button>` : ''}
+        ${isHumility ? `<div class="artifact-click-hint">click to set</div>` : ''}
       </div>`;
     const key      = `${art.type}${art.level}${art.rarity}`;
     const spec     = ARTIFACT_SPECS[key];
     const effect   = spec ? spec[0] : '?';
     const numSlots = spec ? spec[1] : 0;
-    const stoneHtml = (art.stones || []).slice(0, numSlots)
-      .filter(s => s.type)
-      .map(s => `<div class="stone-chip">${stoneImg(s.type + s.level, 16)} ${s.type} lv${s.level}</div>`)
+    const desc     = ARTI_EFFECT_DESC[art.type] || '';
+    const effectStr = desc ? `${effect} ${desc}` : effect;
+    const capName  = art.type.charAt(0).toUpperCase() + art.type.slice(1);
+
+    // Stone images side-by-side, overlapping the bottom of the artifact image
+    const activeStones = (art.stones || []).slice(0, numSlots).filter(s => s.type);
+    const stoneImgs = activeStones
+      .map(s => `<div class="stone-under">${stoneImg(s.type + s.level, 22)}</div>`)
       .join('');
+    const stoneRow = stoneImgs
+      ? `<div class="artifact-stone-row">${stoneImgs}</div>`
+      : '';
+
     return `
-      <div class="artifact-display-card" id="art-card-${slot}">
-        <div class="artifact-card-img">${artiImg(art.type, art.level, 104)}</div>
-        <div class="artifact-display-name">${art.type} T${art.level}${RARITY_LETTER[art.rarity]||''}</div>
-        <div class="artifact-display-effect" title="Effect value">${effect}</div>
-        ${stoneHtml ? `<div class="artifact-display-stones" style="margin-top:4px">${stoneHtml}</div>` : ''}
-        ${isHumility ? `<button class="btn-upgrade" style="margin-top:8px;width:100%;font-size:11px" onclick="openArtifactEditor('${slot}')">Edit</button>` : ''}
+      <div class="artifact-display-card" id="art-card-${slot}" ${isHumility ? `onclick="openArtifactEditor('${slot}')"` : ''}>
+        <div class="artifact-card-img">${artiImg(art.type, art.level, 80)}</div>
+        ${stoneRow}
+        <div class="artifact-display-name"><span class="artifact-rarity-badge rarity-${art.rarity}">T${art.level}${RARITY_LETTER[art.rarity]||''}</span> ${capName}</div>
+        <div class="artifact-display-effect">${effectStr}</div>
+        ${isHumility ? `<div class="artifact-click-hint">click to edit</div>` : ''}
       </div>`;
   }).join('');
 
@@ -687,41 +652,50 @@ function renderArtifactsTab() {
     <div class="artifact-display-grid">${cards}</div>`;
 }
 
-// ─── Inline Artifact Editor ────────────────────────────────
+// ─── Artifact Editor Modal ─────────────────────────────────
 
 function openArtifactEditor(slot) {
-  // Build editor inline below the grid
   const existing = state.artifact_set?.[slot] || {};
-  const id = `art-editor-${slot}`;
-  // Remove any existing editor
-  document.querySelectorAll('.artifact-editor').forEach(e => e.remove());
+  // Remove any stale modal
+  document.getElementById('artifact-editor-modal')?.remove();
 
   const allTypes = ['', ...ARTIFACT_TYPES];
-  const el = document.createElement('div');
-  el.className = 'artifact-editor';
-  el.id = id;
-  el.innerHTML = `
-    <div class="artifact-editor-title">Editing ${slot.toUpperCase()}</div>
-    <div class="artifact-row">
-      <select id="ae-${slot}-type" onchange="refreshArtifactEditor('${slot}')">
-        ${allTypes.map(t => `<option value="${t}" ${t===existing.type?'selected':''}>${t||'— none —'}</option>`).join('')}
-      </select>
-      <select id="ae-${slot}-level" onchange="refreshArtifactEditor('${slot}')">
-        ${[1,2,3,4].map(n => `<option value="${n}" ${n===existing.level?'selected':''}>${'T'+n}</option>`).join('')}
-      </select>
-      <select id="ae-${slot}-rarity" onchange="refreshArtifactEditor('${slot}')">
-        ${[0,1,2,3].map(n => `<option value="${n}" ${n===existing.rarity?'selected':''}>${RARITY_NAME[n]}</option>`).join('')}
-      </select>
-    </div>
-    <div id="ae-${slot}-info" class="artifact-editor-info"></div>
-    <div id="ae-${slot}-stones" class="stone-row"></div>
-    <div style="display:flex;gap:6px;margin-top:8px">
-      <button class="btn-action" onclick="applyArtifactEditor('${slot}')">Apply</button>
-      <button class="btn-secondary" onclick="clearArtifactSlot('${slot}')">Clear slot</button>
-      <button class="btn-secondary" onclick="document.getElementById('${id}').remove()">Cancel</button>
+  const overlay = document.createElement('div');
+  overlay.id = 'artifact-editor-modal';
+  overlay.className = 'modal-overlay';
+  overlay.style.display = 'flex';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div class="modal-box" style="width:360px">
+      <div class="modal-header">
+        <span class="modal-title">Edit Artifact ${slot.toUpperCase()}</span>
+        <button class="modal-close" onclick="document.getElementById('artifact-editor-modal').remove()">×</button>
+      </div>
+      <div class="modal-body" style="padding:14px 16px">
+        <div class="artifact-row" style="gap:6px;display:flex;flex-wrap:wrap;margin-bottom:8px">
+          <select id="ae-${slot}-type" onchange="refreshArtifactEditor('${slot}')" style="flex:1;min-width:100px">
+            ${allTypes.map(t => `<option value="${t}" ${t===existing.type?'selected':''}>${t||'— none —'}</option>`).join('')}
+          </select>
+          <select id="ae-${slot}-level" onchange="refreshArtifactEditor('${slot}')">
+            ${[1,2,3,4].map(n => `<option value="${n}" ${n===existing.level?'selected':''}>T${n}</option>`).join('')}
+          </select>
+          <select id="ae-${slot}-rarity" onchange="refreshArtifactEditor('${slot}')">
+            ${[0,1,2,3].map(n => `<option value="${n}" ${n===existing.rarity?'selected':''}>${RARITY_NAME[n]}</option>`).join('')}
+          </select>
+        </div>
+        <div id="ae-${slot}-info" class="artifact-editor-info"></div>
+        <div id="ae-${slot}-stones" class="stone-row"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="clearArtifactSlot('${slot}')">Clear slot</button>
+        <div style="flex:1"></div>
+        <button class="btn-secondary" onclick="document.getElementById('artifact-editor-modal').remove()">Cancel</button>
+        <button class="btn-primary" onclick="applyArtifactEditor('${slot}')">Apply</button>
+      </div>
     </div>`;
 
-  document.getElementById('tab-artifacts-content').appendChild(el);
+  document.body.appendChild(overlay);
   refreshArtifactEditor(slot, existing.stones);
 }
 
@@ -801,13 +775,13 @@ async function applyArtifactEditor(slot) {
   });
 
   await apiAction('/api/action/set_artifact', { slot, artifact: { type, level, rarity, stones } });
-  document.getElementById(`art-editor-${slot}`)?.remove();
+  document.getElementById('artifact-editor-modal')?.remove();
   showToast(`Artifact ${slot.toUpperCase()} set`);
 }
 
 async function clearArtifactSlot(slot) {
   await apiAction('/api/action/set_artifact', { slot, artifact: { type:'', level:0, rarity:0, stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}] } });
-  document.getElementById(`art-editor-${slot}`)?.remove();
+  document.getElementById('artifact-editor-modal')?.remove();
   showToast(`Slot ${slot.toUpperCase()} cleared`);
 }
 
@@ -906,6 +880,7 @@ function closeCredits() {
 
 async function addEvent() {
   const type = document.getElementById('event-type').value;
+  const mult = parseFloat(document.getElementById('event-mult').value) || 2;
   if (!state) return;
   state.events = state.events || {};
   state.events[type] = mult;
@@ -1248,6 +1223,7 @@ function renderSnapshots() {
       <span class="snapshot-egg">${eggImg(snap.egg, 18)}</span>
       <span class="snapshot-label" style="color:${EGG_COLOR[snap.egg]||''}" onclick="renameSnapshot(${i})" title="Click to rename">${snap.label || ('#' + snap.n + ' ' + snap.egg)}</span>
       <span class="snapshot-meta">${snap.time} · ${snap.totalTE}${teImg(13)}</span>
+      <button class="snapshot-btn-load" onclick="exportSnapshot(${i})" title="Export to text">⬆</button>
       <button class="snapshot-btn-load" onclick="loadSnapshot(${i})" title="Restore this snapshot">↩</button>
       <button class="snapshot-btn-load" onclick="deleteSnapshot(${i})" style="color:var(--red)" title="Delete">×</button>
     </div>`).join('');
@@ -1296,85 +1272,272 @@ async function doReset() {
   showStartEggPicker();
 }
 
-// ─── Replay ────────────────────────────────────────────────
+// ─── Snapshot Export / Import ──────────────────────────────
 
-async function replayInput() {
-  const raw = document.getElementById('custom-input').value.trim();
-  if (!raw) return;
-  const lines = raw.split('\n').map(l=>l.trim()).filter(l=>l && !l.startsWith('#'));
-  let ok = 0, fail = 0;
-  for (const line of lines) {
-    const parts = line.split(/\s+/);
-    const cmd = parts[0];
-    const arg = parts.slice(1).join(' ');
-    const eggs = ['curiosity','kindness','resilience','humility','integrity'];
-    try {
-      if (cmd === 'shift') {
-        await apiAction('/api/action/shift', { egg: arg });
-      } else if (eggs.includes(cmd)) {
-        // "curiosity 1h" or "curiosity 5te"
-        if (arg.endsWith('te')) {
-          await apiAction('/api/action/simulate_egg', { egg:cmd, mode:'te', value: parseInt(arg) });
-        } else {
-          await apiAction('/api/action/simulate_egg', { egg:cmd, mode:'time', value: arg });
-        }
-      } else if (cmd === 'wait') {
-        // "wait 1h"  or  "wait 100B cash"
-        if (parts[parts.length-1] === 'cash') {
-          await apiAction('/api/action/wait', { mode:'offline', wait_type:'cash', value: parts[1] });
-        } else {
-          await apiAction('/api/action/wait', { mode:'offline', wait_type:'time', value: arg });
-        }
-      } else if (cmd === 'waitactive') {
-        if (parts[parts.length-1] === 'cash') {
-          await apiAction('/api/action/wait', { mode:'active', wait_type:'cash', value: parts[1] });
-        } else {
-          await apiAction('/api/action/wait', { mode:'active', wait_type:'time', value: arg });
-        }
-      } else if (cmd === 'buyall') {
-        await apiAction('/api/action/buy_all');
-      } else if (cmd === 'buy') {
-        // "buy cr 5" / "buy hab 0" / "buy vehicle 2" / "buy silo"
-        const subtype = parts[1];
-        const idx     = parseInt(parts[2]) || 0;
-        if (subtype === 'silo') {
-          await apiAction('/api/action/buy', { type:'silo', index:0 });
-        } else if (['cr','hab','vehicle'].includes(subtype)) {
-          await apiAction('/api/action/buy', { type:subtype, index:idx });
-        } else {
-          console.warn('Unknown buy type:', subtype); fail++; continue;
-        }
-      } else if (cmd === 'prestige') {
-        await apiAction('/api/action/prestige');
-      } else if (cmd === 'artifact') {
-        // "artifact a1 totem 4 L lunar 3 lunar 3" or "artifact a1 clear"
-        const slot = parts[1];
-        if (parts[2] === 'clear') {
-          await apiAction('/api/action/set_artifact', {
-            slot,
-            artifact: { type:'', level:0, rarity:0, stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}] }
-          });
-        } else {
-          const type   = parts[2];
-          const level  = parseInt(parts[3]) || 1;
-          const rarity = {'C':0,'R':1,'E':2,'L':3}[parts[4]] ?? 0;
-          // Parse stones: pairs of "stonetype level"
-          const stones = [{type:'',level:0},{type:'',level:0},{type:'',level:0}];
-          let p = 5, si = 0;
-          while (p+1 < parts.length && si < 3) {
-            const stype = parts[p], slv = parseInt(parts[p+1]);
-            if (stype && !isNaN(slv)) { stones[si] = { type:stype, level:slv }; si++; p+=2; }
-            else break;
-          }
-          await apiAction('/api/action/set_artifact', { slot, artifact: { type, level, rarity, stones } });
-        }
-      } else {
-        console.warn('Unknown replay command:', cmd); fail++; continue;
-      }
-      ok++;
-    } catch(e) { console.warn('Replay error on:', line, e); fail++; }
+const EGG_NAMES = ['curiosity','kindness','resilience','humility','integrity'];
+const COLL_KEYS = ['carbon','chocolate','easter','firework','flame','lithium','pegg','pumpkin','silicon','waterballoon','wood'];
+const ER_KEYS = [
+  'hold_to_hatch','epic_hatchery','silo_capacity','accounting_tricks',
+  'epic_int_hatcheries','cheaper_contractors','bust_unions','lab_upgrade',
+  'epic_clucking','epic_multiplier','drone_rewards','video_doubler_time',
+  'internal_hatchery_calm','soul_food','prestige_bonus','epic_comfy_nests',
+  'transportation_lobbyists','internal_hatchery_sharing','hold_to_research',
+  'prophecy_bonus','ftl_drive_upgrades','zero_g_quantum_containment'
+];
+
+function exportSnapshotText(snap) {
+  const s = snap.state;
+  const lines = [];
+
+  // Header
+  lines.push('# Virtue Simulator Snapshot');
+  lines.push(`# Label: ${snap.label || ('#' + snap.n + ' ' + snap.egg)}`);
+  lines.push(`# Time: ${snap.time}  TE: ${snap.totalTE}`);
+  lines.push('');
+
+  // General
+  lines.push('[general]');
+  lines.push(`egg = ${s.egg}`);
+  lines.push(`te = ${s.te}`);
+  lines.push(`se = ${s.se}`);
+  lines.push(`pe = ${s.pe}`);
+  lines.push(`cash = ${s.cash}`);
+  lines.push(`pop = ${s.pop}`);
+  lines.push(`time_elapsed = ${s.time_elapsed}`);
+  lines.push(`shifts = ${s.shifts}`);
+  lines.push(`shifts_start = ${s.shifts_start}`);
+  lines.push(`video_doubler = ${s.video_doubler ? 'true' : 'false'}`);
+  lines.push('');
+
+  // Eggs layed
+  lines.push('[eggs_layed]');
+  EGG_NAMES.forEach((e, i) => lines.push(`${e} = ${s.eggs_layed?.[i] ?? 0}`));
+  lines.push('');
+
+  // TE claimed per egg
+  lines.push('[te_claimed]');
+  EGG_NAMES.forEach((e, i) => lines.push(`${e} = ${s.te_claimed?.[i] ?? 0}`));
+  lines.push('');
+
+  // Habs
+  lines.push('[habs]');
+  (s.habs || []).forEach((v, i) => lines.push(`hab${i+1} = ${v}`));
+  lines.push('');
+
+  // Vehicles
+  lines.push('[vehicles]');
+  (s.vehicles || []).forEach((v, i) => lines.push(`v${i} = ${v}`));
+  lines.push('');
+
+  // Silos
+  lines.push('[silos]');
+  lines.push(`count = ${s.silos}`);
+  lines.push('');
+
+  // Common Research
+  lines.push('[common_research]');
+  (s.cr || []).forEach((v, i) => lines.push(`cr${i} = ${v}  # ${CR_NAMES[i] || '?'}`));
+  lines.push('');
+
+  // Epic Research
+  lines.push('[epic_research]');
+  ER_KEYS.forEach((k, i) => lines.push(`${k} = ${s.er?.[i] ?? 0}  # ${ER_NAMES[i]?.[0] || '?'} (max ${ER_NAMES[i]?.[1] || '?'})`));
+  lines.push('');
+
+  // Colleggtibles
+  lines.push('[colleggtibles]');
+  COLL_KEYS.forEach((k, i) => lines.push(`${k} = ${s.colleggtibles?.[i] ?? 0}`));
+  lines.push('');
+
+  // Artifacts
+  lines.push('[artifacts]');
+  const slots = ['a1','a2','a3','a4'];
+  slots.forEach(slot => {
+    const a = s.artifact_set?.[slot];
+    if (!a || !a.type) {
+      lines.push(`${slot} = empty`);
+    } else {
+      const rarity = ['C','R','E','L'][a.rarity] || 'C';
+      const stones = (a.stones || []).map(st =>
+        (st && st.type) ? `${st.type}:${st.level}` : 'none'
+      ).join(' ');
+      lines.push(`${slot} = ${a.type} T${a.level} ${rarity} | ${stones}`);
+    }
+  });
+  lines.push('');
+
+  // Events
+  lines.push('[events]');
+  const evts = s.events || {};
+  Object.entries(evts).forEach(([k, v]) => lines.push(`${k} = ${v}`));
+
+  return lines.join('\n');
+}
+
+function exportSnapshot(i) {
+  const snap = snapshots[i];
+  if (!snap) return;
+  const text = exportSnapshotText(snap);
+  document.getElementById('snapshot-text-area').value = text;
+  showToast(`Exported snapshot #${snap.n} to text`);
+}
+
+function clearSnapshotText() {
+  document.getElementById('snapshot-text-area').value = '';
+}
+
+function importSnapshotText() {
+  const raw = document.getElementById('snapshot-text-area').value.trim();
+  if (!raw) { showToast('No text to import', true); return; }
+
+  try {
+    const { state: s, label: parsedLabel } = parseSnapshotText(raw);
+    const n = snapshots.length + 1;
+    const egg = s.egg || 'curiosity';
+    const claimed = s.te || 0;
+    const pending = (s.eggs_layed||[]).reduce((sum,e,i) =>
+      sum + Math.max(0, teNumbers(e) - (s.te_claimed?.[i]||0)), 0);
+    const totalTE = claimed + pending;
+    snapshots.push({
+      n, egg,
+      time: _fmtTime(s.time_elapsed || 0),
+      totalTE, pending,
+      label: parsedLabel || `Imported #${n}`,
+      state: s
+    });
+    renderSnapshots();
+    showToast(`Snapshot imported — click ↩ to load it`);
+  } catch(e) {
+    showToast('Import failed: ' + e.message, true);
+    console.error(e);
   }
-  showToast(`Replay done — ${ok} commands${fail ? `, ${fail} failed` : ''}`);
+}
+
+function parseSnapshotText(raw) {
+  const lines = raw.split('\n');
+  let section = '';
+  let parsedLabel = null;
+  const s = {
+    egg: 'curiosity', te: 0, se: 0, pe: 0, cash: 0, pop: 0,
+    time_elapsed: 0, shifts: 0, shifts_start: 0, video_doubler: true,
+    eggs_layed: [0,0,0,0,0], te_claimed: [0,0,0,0,0],
+    habs: [1,0,0,0], vehicles: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    silos: 1,
+    cr: Array(56).fill(0), er: [15,20,20,20,20,10,10,10,20,100,20,12,20,140,20,20,30,10,20,5,60,10],
+    colleggtibles: [4,4,4,4,4,4,4,4,4,4,4],
+    artifact_set: {
+      a1:{type:'',level:0,rarity:0,stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}]},
+      a2:{type:'',level:0,rarity:0,stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}]},
+      a3:{type:'',level:0,rarity:0,stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}]},
+      a4:{type:'',level:0,rarity:0,stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}]},
+    },
+    events: {cash:1,drone:1,cr:1,hab:1,veh:1,gift:1},
+    log: []
+  };
+
+  for (let line of lines) {
+    // Extract label from comment header before stripping
+    const labelMatch = line.match(/^#\s*Label:\s*(.+)$/);
+    if (labelMatch) { parsedLabel = labelMatch[1].trim(); }
+
+    // Strip inline comments and trim
+    line = line.replace(/#.*$/, '').trim();
+    if (!line) continue;
+
+    // Section header
+    if (line.startsWith('[') && line.endsWith(']')) {
+      section = line.slice(1, -1);
+      continue;
+    }
+
+    const eqIdx = line.indexOf('=');
+    if (eqIdx < 0) continue;
+    const key = line.slice(0, eqIdx).trim();
+    const val = line.slice(eqIdx + 1).trim();
+
+    switch (section) {
+      case 'general':
+        if (key === 'egg') s.egg = val;
+        else if (key === 'te') s.te = parseInt(val)||0;
+        else if (key === 'se') s.se = parseFloat(val)||0;
+        else if (key === 'pe') s.pe = parseInt(val)||0;
+        else if (key === 'cash') s.cash = parseFloat(val)||0;
+        else if (key === 'pop') s.pop = parseFloat(val)||0;
+        else if (key === 'time_elapsed') s.time_elapsed = parseFloat(val)||0;
+        else if (key === 'shifts') s.shifts = parseInt(val)||0;
+        else if (key === 'shifts_start') s.shifts_start = parseInt(val)||0;
+        else if (key === 'video_doubler') s.video_doubler = val === 'true';
+        break;
+      case 'eggs_layed': {
+        const i = EGG_NAMES.indexOf(key);
+        if (i >= 0) s.eggs_layed[i] = parseFloat(val)||0;
+        break;
+      }
+      case 'te_claimed': {
+        const i = EGG_NAMES.indexOf(key);
+        if (i >= 0) s.te_claimed[i] = parseInt(val)||0;
+        break;
+      }
+      case 'habs': {
+        const m = key.match(/^hab(\d+)$/);
+        if (m) s.habs[parseInt(m[1])-1] = parseInt(val)||0;
+        break;
+      }
+      case 'vehicles': {
+        const m = key.match(/^v(\d+)$/);
+        if (m) s.vehicles[parseInt(m[1])] = parseInt(val)||0;
+        break;
+      }
+      case 'silos':
+        if (key === 'count') s.silos = parseInt(val)||1;
+        break;
+      case 'common_research': {
+        const m = key.match(/^cr(\d+)$/);
+        if (m) s.cr[parseInt(m[1])] = parseInt(val)||0;
+        break;
+      }
+      case 'epic_research': {
+        const i = ER_KEYS.indexOf(key);
+        if (i >= 0) s.er[i] = parseInt(val)||0;
+        break;
+      }
+      case 'colleggtibles': {
+        const i = COLL_KEYS.indexOf(key);
+        if (i >= 0) s.colleggtibles[i] = parseInt(val)||0;
+        break;
+      }
+      case 'artifacts': {
+        const slot = key; // a1, a2, a3, a4
+        if (!s.artifact_set[slot]) break;
+        if (val === 'empty') {
+          s.artifact_set[slot] = {type:'',level:0,rarity:0,stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}]};
+        } else {
+          // Format: "totem T4 L | lunar:3 soul:2 none"
+          const [artifactPart, stonesPart] = val.split('|').map(p => p.trim());
+          const aParts = artifactPart.split(/\s+/);
+          const type = aParts[0];
+          const level = parseInt((aParts[1]||'T1').replace('T',''))||1;
+          const rarityMap = {C:0,R:1,E:2,L:3};
+          const rarity = rarityMap[aParts[2]] ?? 0;
+          const stoneTokens = (stonesPart || '').split(/\s+/);
+          const stones = [{type:'',level:0},{type:'',level:0},{type:'',level:0}];
+          stoneTokens.slice(0,3).forEach((tok, si) => {
+            if (tok && tok !== 'none') {
+              const [stype, slv] = tok.split(':');
+              stones[si] = { type: stype, level: parseInt(slv)||1 };
+            }
+          });
+          s.artifact_set[slot] = { type, level, rarity, stones };
+        }
+        break;
+      }
+      case 'events':
+        if (key in s.events) s.events[key] = parseFloat(val)||1;
+        break;
+    }
+  }
+
+  return { state: s, label: parsedLabel };
 }
 
 // ─── Helpers ───────────────────────────────────────────────
@@ -1431,6 +1594,56 @@ function showToast(msg, error=false) {
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.className='toast',2800);
 }
+
+// ─── Snapshot textarea top-resize ──────────────────────────
+
+(function() {
+  function initResize() {
+    const handle = document.getElementById('snapshot-resize-handle');
+    const ta     = document.getElementById('snapshot-text-area');
+    if (!handle || !ta) return;
+
+    let startY, startH;
+
+    handle.addEventListener('mousedown', e => {
+      startY = e.clientY;
+      startH = ta.getBoundingClientRect().height;
+      e.preventDefault();
+
+      function onMove(e) {
+        // Dragging up (negative delta) increases height
+        const delta = startY - e.clientY;
+        ta.style.height = Math.max(40, startH + delta) + 'px';
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+
+    // Touch support
+    handle.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+      startH = ta.getBoundingClientRect().height;
+      e.preventDefault();
+
+      function onMove(e) {
+        const delta = startY - e.touches[0].clientY;
+        ta.style.height = Math.max(40, startH + delta) + 'px';
+      }
+      function onEnd() {
+        handle.removeEventListener('touchmove', onMove);
+        handle.removeEventListener('touchend', onEnd);
+      }
+      handle.addEventListener('touchmove', onMove, { passive: false });
+      handle.addEventListener('touchend', onEnd);
+    }, { passive: false });
+  }
+
+  window.addEventListener('DOMContentLoaded', initResize);
+})();
 
 // ─── Boot ──────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', init);
