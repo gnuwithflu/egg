@@ -17,7 +17,7 @@ virtue_egg_index = {
     "integrity": 4
 }
 
-treshholds = [0, 50e6, 1e9, 10e9, 70e9, 500e9, 2e12, 7e12, 20e12, 60e12, 150e12, 500e12, 1.5e15, 4e15, 10e15, 25e15, 50e15, 100e15]
+thresholds = [0, 50e6, 1e9, 10e9, 70e9, 500e9, 2e12, 7e12, 20e12, 60e12, 150e12, 500e12, 1.5e15, 4e15, 10e15, 25e15, 50e15, 100e15]
 
 
 class State:
@@ -32,17 +32,17 @@ class State:
         for i in range(5):
             self.te_claimed[i] = te_numbers(self.eggs_layed[i])
 
-def te_treshholds(n):
+def te_thresholds(n):
     # returns how many eggs layed are needed for n TE
     if n<17:
-        return treshholds[n]
+        return thresholds[n]
     return 1e17 + (n-17)*1e16*(n/2 - 4)
 
 def te_numbers(eggs_layed):
     # number of te obtained when having a certain number of eggs layed
     i = 0
     while i<18:
-        if te_treshholds(i)>eggs_layed:
+        if te_thresholds(i)>eggs_layed:
             return i - 1
         i += 1
     return math.floor(quad_formula(a=0.5, b=-12.5, c=68-(eggs_layed-1e17)/1e16))
@@ -175,10 +175,10 @@ def index(state, s=""):
     from simulation.wait import time_layed
     egg = virtue_egg_index[state.farm.egg]
     egg_name = "\033[34m" + state.farm.egg.capitalize() + " egg farm\033[31m"
-    layed = "Layed: \033[32m" + str(format(state.eggs_layed[egg])) + "/" +str(format(te_treshholds(te_numbers(state.eggs_layed[egg])+1)))
+    layed = "Layed: \033[32m" + str(format(state.eggs_layed[egg])) + "/" +str(format(te_thresholds(te_numbers(state.eggs_layed[egg])+1)))
     te = "Total TE: \033[32m" + str(int(float(format(state.farm.te)))) + "+" + str(te_growth(state))
     te_egg = "Truth Eggs: \033[32m" + str(int(state.te_claimed[egg])) + "+" + str(te_numbers(state.eggs_layed[egg])-state.te_claimed[egg])
-    time_te = "Next TE: \033[32m" + str(format_time(time_layed(state, te_treshholds(te_numbers(state.eggs_layed[egg])+1) - state.eggs_layed[egg])))
+    time_te = "Next TE: \033[32m" + str(format_time(time_layed(state, te_thresholds(te_numbers(state.eggs_layed[egg])+1) - state.eggs_layed[egg])))
     pop = "Pop: \033[32m" + str(format(int(state.farm.pop))) + "/" + str(format(int(state.farm.hab_size)))
     cash = "Cash: \033[32m" + str(format(state.farm.cash))
     laying = "Laying: \033[32m" + str(format(state.farm.laying_chick*int(state.farm.pop)*60)) + "/min"
@@ -213,11 +213,11 @@ def virtue(state, s=""):
     # prints virtue stats
     print(f"\033[34m----- Virtue Stats -----\033[0m")
     print(f"Egg         Layed     Goal      TE")
-    print(f"Curiosity:  \033[32m{format(state.eggs_layed[0]):<9} {format(te_treshholds(te_numbers(state.eggs_layed[0])+1)):<9} {state.te_claimed[0]}+{te_numbers(state.eggs_layed[0])-state.te_claimed[0]}\033[0m")
-    print(f"Kindness:   \033[32m{format(state.eggs_layed[1]):<9} {format(te_treshholds(te_numbers(state.eggs_layed[1])+1)):<9} {state.te_claimed[1]}+{te_numbers(state.eggs_layed[1])-state.te_claimed[1]}\033[0m")
-    print(f"Resilience: \033[32m{format(state.eggs_layed[2]):<9} {format(te_treshholds(te_numbers(state.eggs_layed[2])+1)):<9} {state.te_claimed[2]}+{te_numbers(state.eggs_layed[2])-state.te_claimed[2]}\033[0m")
-    print(f"Humility:   \033[32m{format(state.eggs_layed[3]):<9} {format(te_treshholds(te_numbers(state.eggs_layed[3])+1)):<9} {state.te_claimed[3]}+{te_numbers(state.eggs_layed[3])-state.te_claimed[3]}\033[0m")
-    print(f"Integrity:  \033[32m{format(state.eggs_layed[4]):<9} {format(te_treshholds(te_numbers(state.eggs_layed[4])+1)):<9} {state.te_claimed[4]}+{te_numbers(state.eggs_layed[4])-state.te_claimed[4]}\033[0m")
+    print(f"Curiosity:  \033[32m{format(state.eggs_layed[0]):<9} {format(te_thresholds(te_numbers(state.eggs_layed[0])+1)):<9} {state.te_claimed[0]}+{te_numbers(state.eggs_layed[0])-state.te_claimed[0]}\033[0m")
+    print(f"Kindness:   \033[32m{format(state.eggs_layed[1]):<9} {format(te_thresholds(te_numbers(state.eggs_layed[1])+1)):<9} {state.te_claimed[1]}+{te_numbers(state.eggs_layed[1])-state.te_claimed[1]}\033[0m")
+    print(f"Resilience: \033[32m{format(state.eggs_layed[2]):<9} {format(te_thresholds(te_numbers(state.eggs_layed[2])+1)):<9} {state.te_claimed[2]}+{te_numbers(state.eggs_layed[2])-state.te_claimed[2]}\033[0m")
+    print(f"Humility:   \033[32m{format(state.eggs_layed[3]):<9} {format(te_thresholds(te_numbers(state.eggs_layed[3])+1)):<9} {state.te_claimed[3]}+{te_numbers(state.eggs_layed[3])-state.te_claimed[3]}\033[0m")
+    print(f"Integrity:  \033[32m{format(state.eggs_layed[4]):<9} {format(te_thresholds(te_numbers(state.eggs_layed[4])+1)):<9} {state.te_claimed[4]}+{te_numbers(state.eggs_layed[4])-state.te_claimed[4]}\033[0m")
     print()
 
 
@@ -343,7 +343,7 @@ def cr_status(state, s=""):
     print(f"\033[34m----- Research -----\033[0m")
     for i in range(len(state.farm.cr)):
         if research_available(state=state, cr_index=i):
-            print(f"{i} \033[31m{cr_names[i][1]}\033[0m ({cr_names[i][2]}) Level \033[32m{int(state.farm.cr[i])}/{max_cr[i]}\033[0m costs \033[32m{format(cr_prices[i][int(state.farm.cr[i])] * state.farm.artf.cr_cost * (1-0.05*state.farm.er[7]) * state.farm.coll_effect("waterballoon") * f.coll_effect("ice") * state.farm.event("cr"))}\033[0m" )
+            print(f"{i} \033[31m{cr_names[i][1]}\033[0m ({cr_names[i][2]}) Level \033[32m{int(state.farm.cr[i])}/{max_cr[i]}\033[0m costs \033[32m{format(cr_prices[i][int(state.farm.cr[i])] * state.farm.artf.cr_cost * (1-0.05*state.farm.er[7]) * state.farm.coll_effect("waterballoon") * state.farm.coll_effect("ice") * state.farm.event("cr"))}\033[0m" )
     research_count = sum(state.farm.cr)
     for i in range(len(cr_bounds)-1):
         if cr_bounds[i] > research_count:
@@ -619,7 +619,7 @@ def buy_cr(state, cr_index, printout=True):
     if not research_available(state=state, cr_index=cr_index):
         print(f"Research not available")
         return False
-    upgrade_cost = cr_prices[cr_index][int(f.cr[cr_index])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * coll_effect("ice") * f.event("cr")
+    upgrade_cost = cr_prices[cr_index][int(f.cr[cr_index])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * f.coll_effect("ice") * f.event("cr")
 
     if f.cash<upgrade_cost:
         print(f"Not enough cash!")

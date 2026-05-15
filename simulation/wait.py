@@ -144,8 +144,8 @@ def time_cash_away(state, cash, printout=True): # leaves state unchanged!
         t_hab = (f.hab_size - pop)/growth
         t_ship = (f.max_shipping - f.laying_chick*pop)/(f.laying_chick*growth)
         if t_ship < 0: t_ship = 0
-        cash_hab = f.earnings_away(growth*t_hab/2) * t_hab
-        cash_ship = f.earnings_away(growth*t_ship/2) * t_ship
+        cash_hab = f.earnings_away(pop + growth*t_hab/2) * t_hab
+        cash_ship = f.earnings_away(pop + growth*t_ship/2) * t_ship
 
         # farm grows unrestricted
         if cash_hab>=cash_to_go and cash_ship>=cash_to_go: 
@@ -182,13 +182,13 @@ def time_layed(state, lay): # leaves state unchanged!
         t_hab = (f.hab_size - pop)/growth
         t_ship = (f.max_shipping - f.laying_chick*pop)/(f.laying_chick*growth)
         if t_ship < 0: t_ship = 0
-        lay_hab = f.laying_chick *growth/2 * t_hab
-        lay_ship = f.laying_chick *growth/2 * t_ship
+        lay_hab = f.laying_chick * (pop + growth*t_hab/2) * t_hab
+        lay_ship = f.laying_chick * (pop + growth*t_ship/2) * t_ship
 
         # farm grows unrestricted
-        if lay_hab>=lay_to_go and lay_ship>=lay_to_go: 
+        if lay_hab>=lay_to_go and lay_ship>=lay_to_go:
             return quad_formula(a=f.laying_chick*growth/2, b=f.laying_chick*pop,  c=-lay_to_go)
-        
+
         # shipblocked
         elif lay_hab>=lay_ship and lay_ship<lay_to_go:
             lay_to_go -= lay_ship
@@ -207,7 +207,7 @@ def wait_active(state, t, printout=True, write=True):
     f = state.farm
     if t <= 0:
         if printout: print(f"Duration must be positive")
-        return
+        return 0
     if t < 1: t=1
     
     growth = f.ihr + f.manual_hatchery_rate
@@ -246,7 +246,7 @@ def wait_active(state, t, printout=True, write=True):
         # habblocked
         elif t_hab<t and t_ship>=t_hab:
             pop = f.hab_size
-            cash += f.earnings(pop + f.pop/2) * f.effective_rcb * t_hab
+            cash += f.earnings((pop + f.pop)/2) * f.effective_rcb * t_hab
             cash += (f.gifts_and_drones(pop-1) + f.gifts_and_drones(f.pop))/2 * t_hab
             layed += f.laying_chick * (pop + f.pop)/2 * t_hab
             
@@ -369,13 +369,13 @@ def time_layed_active(state, lay): # leaves state unchanged!
         t_hab = (f.hab_size - pop)/growth
         t_ship = (f.max_shipping - f.laying_chick*pop)/(f.laying_chick*growth)
         if t_ship < 0: t_ship = 0
-        lay_hab = f.laying_chick *growth/2 * t_hab
-        lay_ship = f.laying_chick *growth/2 * t_ship
+        lay_hab = f.laying_chick * (pop + growth*t_hab/2) * t_hab
+        lay_ship = f.laying_chick * (pop + growth*t_ship/2) * t_ship
 
         # farm grows unrestricted
-        if lay_hab>=lay_to_go and lay_ship>=lay_to_go: 
+        if lay_hab>=lay_to_go and lay_ship>=lay_to_go:
             return quad_formula(a=f.laying_chick*growth/2, b=f.laying_chick*pop,  c=-lay_to_go)
-        
+
         # shipblocked
         elif lay_hab>=lay_ship and lay_ship<lay_to_go:
             lay_to_go -= lay_ship

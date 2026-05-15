@@ -60,7 +60,7 @@ def format_time(time):
         return f"{round(time/3600,3)}h"
     elif time<3600*24*365:
         return f"{round(time/(3600*24),3)}d"
-    elif time<3600*24*356*10000:
+    elif time<3600*24*365*10000:
         return f"{round(time/(3600*24*365),3)}y"
     else:
         return f"{format(time/(3600*24*365))}y"

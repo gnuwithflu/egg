@@ -66,7 +66,7 @@ more ore less readable, I just thought it would be nice to let you know :)
         <span class="sub-label">Laying / Ship</span>
         <span class="sub-value" id="stat-laying">—</span>
       </div>
-      <div class="sub-stat" data-tip="Earning Bonus from SE, PE and TE">
+      <div class="sub-stat" data-tip="Earning Bonus from TE">
         <span class="sub-label">EB</span>
         <span class="sub-value" id="stat-eb">—</span>
       </div>
@@ -142,8 +142,8 @@ more ore less readable, I just thought it would be nice to let you know :)
           <option value="integrity">Integrity</option>
         </select>
         <input type="text" id="sim-value" class="input-sm" value="1h" placeholder="1h / 5">
-        <button class="btn-action" onclick="simulateEgg()">go</button>
-      </div>
+        <button class="btn-action" onclick="simulateEgg('offline')">offline</button>
+        <button class="btn-action" onclick="simulateEgg('active')">active</button>      </div>
     </div>
 
     <!-- Wait -->

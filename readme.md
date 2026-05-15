@@ -7,7 +7,7 @@ As a disclaimer, I am not a programmer nor web developer. Thus, I don't do codin
 
 ## The website
 After selecting a starting egg, you are in the main simulation. I hope most is self explanatory, maybe some quick notes:
-- Simulate eggs really simulates your stay on that egg for the time set, including buying stuff. For habs and vehicles, the cheapest one is purchased when available. For curiosity, research is bough in a reasonable, but maybe not optimal manner. Rockets are not simulated, so you'd have to set artifacts by yourself.
+- Simulate eggs really simulates your stay on that egg for the time set, including buying stuff. For habs and vehicles, the cheapest one is purchased when available. For curiosity, research is bought in a reasonable, but maybe not optimal manner. Rockets are not simulated, so you'd have to set artifacts by yourself.
 - There are two waiting options: Offline and active, which includes running chickens, catching drones and opening boxes and ads. The egg simulation uses both, whichever is favorable, but active waiting is only better with few chickens and research.
 - Snapshots of a certain configuration can be saved. The way they can be exported is by copying the session log to the input console, this can be saved anywhere and copied back.
 - the edit mode allows to edit anything, ignoring cash, time or shifts
