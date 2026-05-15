@@ -143,7 +143,7 @@ def find_cheapest(state, mode_time=None, time_rest=0, lay=0):
         min_price_eff = np.inf
         for i in range(len(f.cr)):
             if research_available(state=state, cr_index=i):
-                upgrade_cost = cr_prices[i][int(f.cr[i])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * f.event("cr")
+                upgrade_cost = cr_prices[i][int(f.cr[i])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * f.coll_effect("ice") * f.event("cr")
                 if upgrade_cost / cr_priority(state, i) < min_price_eff and enough(time_cash_away(state, upgrade_cost)):
                     min_price_eff = upgrade_cost / cr_priority(state, i)
                     min_price = upgrade_cost

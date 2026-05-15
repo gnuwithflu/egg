@@ -30,6 +30,7 @@ egg_specs = { # coefficient, value
     "easter": [27,0.05],
     "firework": [27,4.99],
     "flame": [27,50],
+    "ice": [27,2],
     "lithium": [27,100],
     "pumpkin": [27,0.99],
     "silicon": [27,50],
@@ -47,6 +48,7 @@ coll_specs = {
     "easter": [1,1.01,1.02,1.03,1.05],
     "firework": [1,1.01,1.02,1.03,1.05],
     "flame": [1,0.99,0.95,0.88,0.75],
+    "ice": [1,0.99,0.98,0.965,0.95],
     "lithium": [1,0.98,0.96,0.93,0.9],
     "pegg": [1,1.01,1.02,1.03,1.05],
     "pumpkin": [1,1.01,1.02,1.03,1.05],
@@ -61,12 +63,13 @@ coll_index = {
     "easter": 2,
     "firework": 3,
     "flame": 4,
-    "lithium": 5,
-    "pegg": 6,
-    "pumpkin": 7,
-    "silicon": 8,
-    "waterballoon": 9,
-    "wood": 10
+    "ice": 5,
+    "lithium": 6,
+    "pegg": 7,
+    "pumpkin": 8,
+    "silicon": 9,
+    "waterballoon": 10,
+    "wood": 11
     }
 
 vehicle_capacities = [0,5000,15_000,50_000,100_000,250_000,500_000,1e6,5e6,15e6,30e6,50e6,50e6,100e6,150e6,200e6,250e6,300e6,350e6,400e6,450e6,500e6]

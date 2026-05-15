@@ -343,7 +343,7 @@ def cr_status(state, s=""):
     print(f"\033[34m----- Research -----\033[0m")
     for i in range(len(state.farm.cr)):
         if research_available(state=state, cr_index=i):
-            print(f"{i} \033[31m{cr_names[i][1]}\033[0m ({cr_names[i][2]}) Level \033[32m{int(state.farm.cr[i])}/{max_cr[i]}\033[0m costs \033[32m{format(cr_prices[i][int(state.farm.cr[i])] * state.farm.artf.cr_cost * (1-0.05*state.farm.er[7]) * state.farm.coll_effect("waterballoon") * state.farm.event("cr"))}\033[0m" )
+            print(f"{i} \033[31m{cr_names[i][1]}\033[0m ({cr_names[i][2]}) Level \033[32m{int(state.farm.cr[i])}/{max_cr[i]}\033[0m costs \033[32m{format(cr_prices[i][int(state.farm.cr[i])] * state.farm.artf.cr_cost * (1-0.05*state.farm.er[7]) * state.farm.coll_effect("waterballoon") * f.coll_effect("ice") * state.farm.event("cr"))}\033[0m" )
     research_count = sum(state.farm.cr)
     for i in range(len(cr_bounds)-1):
         if cr_bounds[i] > research_count:
@@ -619,7 +619,7 @@ def buy_cr(state, cr_index, printout=True):
     if not research_available(state=state, cr_index=cr_index):
         print(f"Research not available")
         return False
-    upgrade_cost = cr_prices[cr_index][int(f.cr[cr_index])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * f.event("cr")
+    upgrade_cost = cr_prices[cr_index][int(f.cr[cr_index])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * coll_effect("ice") * f.event("cr")
 
     if f.cash<upgrade_cost:
         print(f"Not enough cash!")
@@ -642,7 +642,7 @@ def buy_cr_all(state, printout=True):
         min_index = -1
         for i in range(len(f.cr)):
             if research_available(state=state, cr_index=i):
-                upgrade_cost = cr_prices[i][int(f.cr[i])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * f.event("cr")
+                upgrade_cost = cr_prices[i][int(f.cr[i])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * f.coll_effect("ice") * f.event("cr")
                 if upgrade_cost < min_price:
                     min_price = upgrade_cost
                     min_index = i

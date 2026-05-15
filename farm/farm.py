@@ -14,7 +14,7 @@ class Farm:
         self.se = se
         self.pe = pe
         self.te = te
-        self.colleggtibles = colleggtibles if colleggtibles is not None else np.ones(11)*4
+        self.colleggtibles = colleggtibles if colleggtibles is not None else np.ones(12)*4
         self.pop = pop if pop is not None else 0
         self.artf = artifact_set if artifact_set is not None else Artifact_set()
         self.video_doubler = video_doubler
