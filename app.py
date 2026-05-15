@@ -47,7 +47,7 @@ def default_state():
         "vehicles": [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "pop": 0,
         "cash": 0,
-        "colleggtibles": [4]*11,
+        "colleggtibles": [4]*12,
         "eggs_layed": [0.0, 0.0, 0.0, 0.0, 0.0],
         "time_elapsed": 0,
         "shifts": 0,
@@ -483,7 +483,7 @@ def get_upgrade_costs():
         for i in range(56):
             if d["cr"][i] >= max_cr[i]: continue
             if not research_available(cli, i): continue
-            cost = cr_prices[i][int(d["cr"][i])] * f.artf.cr_cost * (1-0.05*d["er"][7]) * f.coll_effect("waterballoon") * f.event("cr")
+            cost = cr_prices[i][int(d["cr"][i])] * f.artf.cr_cost * (1-0.05*d["er"][7]) * f.coll_effect("waterballoon") * f.coll_effect("ice") * f.event("cr")
             cr_list.append({
                 "index": i, "name": cr_names[i][1], "effect": cr_names[i][2],
                 "level": int(d["cr"][i]), "max": int(max_cr[i]),
