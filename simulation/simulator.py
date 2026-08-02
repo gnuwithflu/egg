@@ -58,7 +58,7 @@ def simulation(egg=None, te=None, eggs_layed=None, shifts=0, artifact_set=None):
 
     f = Farm(egg=egg, 
                 er=[15,20,20,20,20,10,10,10,20,100,20,12,20,140,20,20,30,10,20,5,60,10], 
-                colleggtibles=np.ones(12)*4,
+                colleggtibles=np.ones(13)*4,
                 vehicles=[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 
                 te=te, 
                 silos=1, 

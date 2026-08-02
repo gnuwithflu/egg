@@ -461,7 +461,8 @@ def buy_silo(state, printout=True):
         print(f"Already maxed silos!")
         return False
     if f.cash < silo_price[f.silos]:
-        print(f"Not enough cash!")
+        if printout:
+            print(f"Not enough cash!")
         return False
 
     f.cash -= silo_price[f.silos]
@@ -505,10 +506,11 @@ def buy_hab(state, hab, printout=True):
     upgrade_cost = hab_prices[f.habs[hab]][same_habs] * (1-0.05*f.er[5]) * f.coll_effect("flame") * f.event("hab")
  
     if f.cash<upgrade_cost:
-        index(state)
-        print(f"Not enough cash!")
+        if printout:
+            index(state)
+            print(f"Not enough cash!")
         return False
-    
+
     f.cash -= upgrade_cost
     f.habs[hab] += 1
     if printout:
@@ -569,9 +571,10 @@ def buy_vehicle(state, vehicle, printout=True):
         upgrade_cost = vehicle_prices[int(f.vehicles[vehicle])][same_vehicles] * (1-0.05*f.er[6]) * f.coll_effect("lithium") * f.event("veh")
 
     if f.cash<upgrade_cost:
-        print(f"Not enough cash!")
+        if printout:
+            print(f"Not enough cash!")
         return False
-    
+
     f.cash -= upgrade_cost
     f.vehicles[vehicle] += 1
     if printout:
@@ -622,9 +625,10 @@ def buy_cr(state, cr_index, printout=True):
     upgrade_cost = cr_prices[cr_index][int(f.cr[cr_index])] * f.artf.cr_cost * (1-0.05*f.er[7]) * f.coll_effect("waterballoon") * f.coll_effect("ice") * f.event("cr")
 
     if f.cash<upgrade_cost:
-        print(f"Not enough cash!")
+        if printout:
+            print(f"Not enough cash!")
         return False
-    
+
     f.cash -= upgrade_cost
     f.cr[cr_index] += 1
     if printout:

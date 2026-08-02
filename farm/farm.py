@@ -215,10 +215,11 @@ class Farm:
         return earnings + self.gifts_and_drones(p)
 
     def gifts_and_drones(self, pop):
-        # gift boxes and video gifts (differ on contract farms)
+        # gift boxes and video gifts
+        # credit @Greenz
         # farm value * (percentage of farm value it drops) * occurance chance * boxes per second
-        gifts = self.farm_value(pop) * (0.0125 * 0.3578 / 325 + 0.0375 * 0.1351 / 325
-            + 0.0125 * 0.0868 / 285 + 0.0375 * 0.4208 / 285)
+        gifts = self.farm_value(pop) * (0.0125 * 0.3324 / 340 + 0.0375 * 0.1425 / 340
+            + 0.0125 * 0.0970 / 306 + 0.0375 * 0.4204 / 306)
         gifts *= self.event("gift")
         if pop <= 100 or self.on_virtue():
             gifts /= 2.5

@@ -62,7 +62,8 @@ def simulate_egg_offline(state, s, egg, printout=True):
 
         if f.cash >= min_price:
             if not buy(state, min_index, printout=False):
-                print(f"You should not see this")
+                if printout:
+                    print(f"You should not see this")
                 break
             counter += 1
             continue
@@ -74,8 +75,9 @@ def simulate_egg_offline(state, s, egg, printout=True):
             wait_offline(state, 1.001*time_cash_away(state, min_price, False), printout=False)
 
             if not buy(state, min_index, printout=False):
-                print(f"You should not see this at all ({f.egg})")
-                break            
+                if printout:
+                    print(f"You should not see this at all ({f.egg})")
+                break
             counter += 1
             continue
         break
@@ -134,7 +136,8 @@ def simulate_egg_active(state, s, egg, printout=True):
 
         if f.cash >= min_price:
             if not buy(state, min_index, printout=False):
-                print(f"You should not see this")
+                if printout:
+                    print(f"You should not see this")
                 break
             counter += 1
             continue
@@ -143,8 +146,9 @@ def simulate_egg_active(state, s, egg, printout=True):
             wait_active(state, 1.01*time_cash_active(state, min_price, False), printout=False)
 
             if not buy(state, min_index, printout=False):
-                print(f"You should not see this at all ({f.egg})")
-                break            
+                if printout:
+                    print(f"You should not see this at all ({f.egg})")
+                break
             counter += 1
             continue
         break
