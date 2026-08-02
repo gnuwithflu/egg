@@ -14,7 +14,7 @@ class Farm:
         self.se = se
         self.pe = pe
         self.te = te
-        self.colleggtibles = colleggtibles if colleggtibles is not None else np.ones(12)*4
+        self.colleggtibles = colleggtibles if colleggtibles is not None else np.ones(13)*4
         self.pop = pop if pop is not None else 0
         self.artf = artifact_set if artifact_set is not None else Artifact_set()
         self.video_doubler = video_doubler
@@ -67,7 +67,7 @@ class Farm:
     @property
     def laying_chick(self):
         #laying rate per chicken is 2 times a factor from epic research times
-        return 2/60*self.artf.laying * (1+0.05*self.er[15]) * self.coll_effect("silicon") * (1+0.1*self.cr[0]) * (1+0.05*self.cr[16]) * (1+0.15*self.cr[23]) * (1+0.10*self.cr[35]) * (1+0.02*self.cr[47]) * (1+0.1*self.cr[55])
+        return 2/60*self.artf.laying * (1+0.05*self.er[15]) * self.coll_effect("silicon") * self.coll_effect("gatoregg")* (1+0.1*self.cr[0]) * (1+0.05*self.cr[16]) * (1+0.15*self.cr[23]) * (1+0.10*self.cr[35]) * (1+0.02*self.cr[47]) * (1+0.1*self.cr[55])
     
     @property
     def max_vehicle_number(self):
@@ -136,7 +136,7 @@ class Farm:
 
     def farm_value(self, p=None): # All without colleggtible effects
         if p is None: p = self.pop
-        laying_chick_naked = self.laying_chick/self.coll_effect("silicon")/self.artf.laying
+        laying_chick_naked = self.laying_chick/self.coll_effect("silicon")/self.coll_effect("gatoregg")/self.artf.laying
 
         def hab_size_effective(p): 
             total_capacity = 0

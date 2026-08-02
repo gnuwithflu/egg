@@ -47,7 +47,7 @@ def default_state():
         "vehicles": [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "pop": 0,
         "cash": 0,
-        "colleggtibles": [4]*12,
+        "colleggtibles": [4]*13,
         "eggs_layed": [0.0, 0.0, 0.0, 0.0, 0.0],
         "time_elapsed": 0,
         "shifts": 0,

@@ -157,7 +157,7 @@ const ER_NAMES = [
   ['Transportation Lobbyists',30],['Internal Hatchery Sharing',10],['Hold To Research',20],
   ['Prophecy Bonus',5],['FTL Drive Upgrades',60],['Zero-G Quantum Containment',10]
 ];
-const COLL_NAMES = ['Carbon','Chocolate','Easter','Firework','Flame','Ice','Lithium','Pegg','Pumpkin','Silicon','Waterballoon','Wood'];
+const COLL_NAMES = ['Carbon','Chocolate','Easter','Firework','Flame','Gatoregg','Ice','Lithium','Pegg','Pumpkin','Silicon','Waterballoon','Wood'];
 const RARITY_LETTER = {0:'C',1:'R',2:'E',3:'L'};
 const RARITY_NAME   = {0:'Common',1:'Rare',2:'Epic',3:'Legendary'};
 
@@ -1275,7 +1275,7 @@ async function doReset() {
 // ─── Snapshot Export / Import ──────────────────────────────
 
 const EGG_NAMES = ['curiosity','kindness','resilience','humility','integrity'];
-const COLL_KEYS = ['carbon','chocolate','easter','firework','flame','ice','lithium','pegg','pumpkin','silicon','waterballoon','wood'];
+const COLL_KEYS = ['carbon','chocolate','easter','firework','flame','gatoregg','ice','lithium','pegg','pumpkin','silicon','waterballoon','wood'];
 const ER_KEYS = [
   'hold_to_hatch','epic_hatchery','silo_capacity','accounting_tricks',
   'epic_int_hatcheries','cheaper_contractors','bust_unions','lab_upgrade',
@@ -1424,7 +1424,7 @@ function parseSnapshotText(raw) {
     habs: [1,0,0,0], vehicles: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     silos: 1,
     cr: Array(56).fill(0), er: [15,20,20,20,20,10,10,10,20,100,20,12,20,140,20,20,30,10,20,5,60,10],
-    colleggtibles: [4,4,4,4,4,4,4,4,4,4,4,4],
+    colleggtibles: [4,4,4,4,4,4,4,4,4,4,4,4,4],
     artifact_set: {
       a1:{type:'',level:0,rarity:0,stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}]},
       a2:{type:'',level:0,rarity:0,stones:[{type:'',level:0},{type:'',level:0},{type:'',level:0}]},
